@@ -1,0 +1,109 @@
+<section class="container grid">
+  {% for block in section.blocks %}
+    {% assign selector = block.settings.selector %}
+    {% assign selected_product = all_products[selector] %}
+    {% capture productsUserHasPurchased %}{{ customer.orders | map: 'line_items' | map: 'product_id' | join: ',' }}{% endcapture %}
+
+      <div class="product-container">
+          {% if productsUserHasPurchased contains selected_product.id %}
+           {% comment %}<p class="absolute">User has already purchased this product!</p>{% endcomment %}
+           <span class="completed">
+                {{ selected_product.featured_image.src | img_url: '300x300', crop: 'center' | img_tag: product.title }}
+                <p>{{ selected_product.title }}</p>
+                <p>{{ selected_product.price | money_with_currency }}</p>
+              </span>
+          {% else %}
+
+          {% assign count = 0 %}
+          {% for i in (1..2) %}
+            {% capture count %}{% increment _count %}{% endcapture %}
+            
+          {% endfor %}
+          {% unless count > '1' %}
+              <a href="{{ selected_product.url}}">
+                {{ selected_product.featured_image.src | img_url: '300x300', crop: 'center' | img_tag: product.title }}
+                <p>{{ selected_product.title }}</p>
+                <p>{{ selected_product.price | money_with_currency }}</p>
+              </a>
+            {% else %} 
+            {% assign count = count | plus: 1 %}
+                {{ selected_product.featured_image.src | img_url: '300x300', crop: 'center' | img_tag: product.title }}
+                <p>{{ selected_product.title }}</p>
+                <p>{{ selected_product.price | money_with_currency }}</p>
+            {% endunless %}
+          {% endif  %}  
+      </div>
+  {% endfor %}
+</section>
+
+<style>
+.grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
+  gap: 15px;
+}
+.product-container {
+    position: relative;
+}
+p.absolute {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.product-container p {
+    padding: 0 10px 0 10px;
+    margin: 0 !important;
+    line-height: 1.6;
+}
+.completed:after {
+    content: '{{ section.settings.owned-text }}';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #4141417a;
+    color: #fff;
+}
+</style>
+
+{% schema %}
+{
+  "name": "Selector",
+  "max_blocks": 8,
+  "blocks": [
+    {
+      "type": "linklist",
+      "name": "Product Selector",
+      "settings": [
+        {
+          "type": "product",
+          "id": "selector",
+          "label": "Product Selector"
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "owned-text",
+      "label": "What To Display When A Course Is Already Owned",
+      "default": "You Already Own This Course"
+    }
+  ]
+}
+{% endschema %}
+
+{% stylesheet %}
+{% endstylesheet %}
+
+{% javascript %}
+{% endjavascript %}
